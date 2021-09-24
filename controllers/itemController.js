@@ -1,3 +1,4 @@
+const { nextTick } = require('async');
 var Item = require('../models/item');
 
 exports.index = function(req, res) {
@@ -7,7 +8,13 @@ exports.index = function(req, res) {
 
 // Display list of items
 exports.item_list = function(req, res) {
-    res.send('TODO List');
+    Item.find({}, 'name category')
+        .populate('category')
+        .exec(function (err, list_items) {
+            if (err) { return next(err); }
+
+            res.render('item_list', { title: 'All items', item_list: list_items });
+        });
 };
 
 // Display detail page for specific item
