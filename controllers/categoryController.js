@@ -1,13 +1,44 @@
 var Category = require('../models/category');
+var Item = require('../models/item');
+
+var async = require('async');
+
+// Handlebars helpers
+Handlebars = require('hbs');
+
+Handlebars.registerHelper('active', function(buttonId, pageId) {
+    if (buttonId.toString() == pageId.toString()) {
+        return true;
+    } else return false;
+});
+
 
 // Display list of categories
 exports.category_list = function(req, res) {
-    res.send('category List');
+    Category.find({}, 'name')
+        .exec(function (err, list_categories) {
+            if (err) { return next(err); }
+
+            res.render('category_list', { title: 'All categories', category_list: list_categories });
+        });
 };
 
 // Display detail page for specific category
+// TODO: Compare to the 'genre' page in the local library project
 exports.category_detail = function(req, res) {
-    res.send('category detail');
+
+    async.parallel({
+        category_list: function(callback) {
+            Category.find({}, 'name', callback);
+        },
+        category_item_list: function(callback) {
+            Item.find({ 'category': req.params.id }, 'name', callback)
+        
+        },
+    }, function(err, results) {
+        console.log(results, req.params);
+        res.render('category_detail', { title: 'Category detail', error: err, data: results, pageId: req.params.id });
+    });
 };
 
 // Display category create form on GET.

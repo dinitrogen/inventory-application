@@ -1,0 +1,22 @@
+ <div class="d-flex justify-content-center py-3">
+      <ul class="nav nav-pills">
+        {{#each data.category_list}}
+        <li class="nav-item">
+          <a href={{this.url}} class="nav-link {{#if (active this._id ../pageId)}}active{{/if}}" aria-current="page">{{this.name}}</a>
+        </li>
+        
+        {{/each}}
+      </ul>
+    </div>
+
+    <ul>
+        {{#each data.category_item_list}}
+        <li>
+            <a href={{this.url}}>{{this.name}}</a>
+        </li>
+        {{/each}}
+    </ul>
+
+  
+
+    

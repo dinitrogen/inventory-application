@@ -1,0 +1,23 @@
+{{!-- <h1>{{title}}</h1>
+
+<ul>
+    {{#each category_list}}
+    <li>
+        <a href={{this.url}}>{{this.name}}</a>
+    </li>
+    {{else}}
+    <li>There are no categories</li>
+    
+    {{/each}}
+</ul> --}}
+
+    <div class="d-flex justify-content-center py-3">
+      <ul class="nav nav-pills">
+        {{#each category_list}}
+        <li class="nav-item">
+          <a href={{this.url}} class="nav-link" aria-current="page">{{this.name}}</a>
+        </li>
+        
+        {{/each}}
+      </ul>
+    </div>
