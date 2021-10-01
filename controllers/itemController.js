@@ -1,3 +1,4 @@
+const { body, validationResult } = require('express-validator');
 var Item = require('../models/item');
 var Category = require('../models/category');
 var async = require('async');
@@ -41,17 +42,65 @@ exports.item_detail = function(req, res) {
 
 // Display item create form on GET.
 exports.item_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: item create GET');
+    Category.find({}, 'name')
+        .exec(function(err, categories) {
+            if (err) { return next(err); }
+
+            res.render('item_form', {title: 'Add item to the armory', category_list: categories});
+        });
 };
 
 // Handle item create on POST.
-exports.item_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: item create POST');
-};
+exports.item_create_post = [
+    // Validate and sanitize
+    body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
+    body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
+    body('price', 'Price must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
+    body('quantity', 'Quantity must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
+    body('category', 'Category must not be empty').trim().isLength({min: 1}).escape(),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+
+        var item = new Item(
+        {   name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            quantity: req.body.quantity,
+            category: req.body.category
+        });
+
+        if (!errors.isEmpty()) {
+            Category.find({}, 'name')
+            .exec(function(err, categories) {
+                if (err) { return next(err); }
+
+                res.render('item_form', {title: 'Add item to the armory', category_list: categories, item: item, errors: errors.array() });
+            });
+            return;
+        }
+        else {
+            // Data from form is valid. save item.
+            item.save(function(err) {
+                if (err) { return next(err); }
+                // successful - redirect to new item record
+                res.redirect(item.url);
+            });
+        }
+    }
+];
 
 // Display item delete form on GET.
 exports.item_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: item delete GET');
+    Item.findById(req.params.id)
+        .exec(function(err, item) {
+            if (err) { return next(err); }
+            if (item==null) {
+                res.redirect('/inventory/items');
+            }         
+
+            res.render('item_delete', {title: 'Delete item', item:item});
+        });
 };
 
 // Handle item delete on POST.

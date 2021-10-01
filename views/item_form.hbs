@@ -1,0 +1,44 @@
+<h1>{{title}}</h1>
+
+<form method="POST" action="">
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" class="form-control" type="text" placeholder="Name of item" name="name"  value="{{getFormValue item 'name'}}">
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <input id="description" class="form-control" type="text" placeholder="Description of item" name="description" value="{{getFormValue item 'description'}}">
+    </div>
+    <div class="form-group">
+        <label for="price">Price:</label>
+        <input id="price" class="form-control" type="number" placeholder="Price of item" name="price" value="{{getFormValue item 'price'}}">
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity in stock:</label>
+        <input id="quantity" class="form-control" type="number" placeholder="Quantity in stock" name="quantity" value="{{getFormValue item 'quantity'}}">
+    </div>
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <select id="category" class="form-control" type="select" placeholder="Select category" name="category" >
+            {{#each category_list}}
+            {{#if ../item}}
+            <option value={{this._id}} {{#if (isSelected ../item this._id)}}selected{{/if}}>{{this.name}}</option>
+            {{else}}
+            <option value={{this._id}}>{{this.name}}</option>
+            {{/if}}
+            {{/each}}
+        </select>
+    </div>
+    
+    <br>
+    <button class="btn btn-primary" type="submit">Submit</button>
+    
+</form>
+
+{{#if errors}}
+<ul>
+    {{#each errors}}
+    <li>{{this.msg}}</li>
+    {{/each}}
+</ul>
+{{/if}}

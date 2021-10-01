@@ -12,6 +12,24 @@ Handlebars.registerHelper('active', function(buttonId, pageId) {
     } else return false;
 });
 
+Handlebars.registerHelper('getFormValue', function(object, parameter) {
+    if (undefined===object) {
+        return '';
+    } else {
+        return object[parameter];
+    }
+});
+
+Handlebars.registerHelper('isSelected', function(item, id) {
+    if (id.toString() === item.category._id.toString() || id.toString() === item.category) {
+        return true;
+    } else return false;
+});
+
+Handlebars.registerHelper('concat', function(strA, strB) {
+    return strA.concat(strB);
+});
+
 
 // Display list of categories
 exports.category_list = function(req, res) {
