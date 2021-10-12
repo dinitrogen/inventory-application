@@ -1,1 +1,14 @@
 <h1>{{title}}: {{item.name}}</h1>
+
+<p>Do you really want to delete {{item.name}}?</p>
+
+<form method='POST' action=''>
+    <div class="form-group">
+        <input id={{itemid}} class="form-control" type="hidden" name="itemid" require="true" value={{item._id}}>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Delete</button> 
+
+</form>
+
+
