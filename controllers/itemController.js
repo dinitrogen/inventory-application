@@ -2,6 +2,7 @@ const { body, validationResult } = require('express-validator');
 var Item = require('../models/item');
 var Category = require('../models/category');
 var async = require('async');
+const { InsufficientStorage } = require('http-errors');
 
 exports.index = function(req, res) {
     Item.countDocuments({})
@@ -105,15 +106,74 @@ exports.item_delete_get = function(req, res) {
 
 // Handle item delete on POST.
 exports.item_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: item delete POST');
+    Item.findById(req.body.itemid)
+        .exec(function(err, item) {
+            if (err) { return next(err); }
+            Item.findByIdAndRemove(req.body.itemid, function deleteItem(err) {
+                if (err) { return next(err); }
+                res.redirect('/inventory/items')
+            })
+        })
 };
 
 // Display item update form on GET.
-exports.item_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: item update GET');
+exports.item_update_get = function(req, res, next) {
+    async.parallel({
+        item: function(callback) {
+            Item.findById(req.params.id)
+                .exec(callback)
+        },
+        categories: function(callback) {
+            Category.find(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.item==null) {
+            var err = new Error('Item not found');
+            err.status = 404;
+            return next(err);
+        }
+        res.render('item_form', { title: 'Update item', category_list: results.categories, item: results.item });
+    })
 };
 
 // Handle item update on POST.
-exports.item_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: item update POST');
-};
+exports.item_update_post = [
+    // Validate and sanitize
+    body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
+    body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
+    body('price', 'Price must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
+    body('quantity', 'Quantity must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
+    body('category', 'Category must not be empty').trim().isLength({min: 1}).escape(),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+
+        // Create an Item object with escaped/trimmed data and old id.
+        var item = new Item(
+            {   name: req.body.name,
+                description: req.body.description,
+                price: req.body.price,
+                quantity: req.body.quantity,
+                category: req.body.category,
+                _id:req.params.id // This is required or a new ID will be assigned
+            });
+        
+        if (!errors.isEmpty()) {
+            Category.find({}, 'name') 
+            .exec(function(err, categories) {
+                if (err) { return next(err); }
+
+                res.render('item_form', {title: 'Update item', category_list: categories, item: item, errors: errors.array() });
+            });
+            return;
+        }
+        else {
+            Item.findByIdAndUpdate(req.params.id, item, {}, function(err, theitem) {
+                if (err) { return next(err); }
+                res.redirect(theitem.url);
+            });
+        }
+    }
+    
+]

@@ -1,0 +1,25 @@
+<h1>{{title}}</h1>
+
+<form method="POST" action="">
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" class="form-control" type="text" placeholder="Name of category" name="name"  value="{{getFormValue category 'name'}}">
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <input id="description" class="form-control" type="text" placeholder="Description of category" name="description" value="{{getFormValue category 'description'}}">
+    </div>
+    
+    
+    <br>
+    <button class="btn btn-primary" type="submit">Submit</button>
+    
+</form>
+
+{{#if errors}}
+<ul>
+    {{#each errors}}
+    <li>{{this.msg}}</li>
+    {{/each}}
+</ul>
+{{/if}}

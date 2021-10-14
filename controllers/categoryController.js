@@ -1,3 +1,4 @@
+const { body, validationResult } = require('express-validator');
 var Category = require('../models/category');
 var Item = require('../models/item');
 
@@ -59,14 +60,38 @@ exports.category_detail = function(req, res) {
 };
 
 // Display category create form on GET.
-exports.category_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: category create GET');
+exports.category_create_get = function(req, res, next) {
+    res.render('category_form', { title: 'Create Category' });
 };
 
 // Handle category create on POST.
-exports.category_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: category create POST');
-};
+exports.category_create_post = [
+    //Validation
+    body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
+    body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
+
+    (req, res, next) => {
+
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            res.render('category_form', { title: 'Create Category', category: req.body, errors: errors.array() });
+            return;
+        }
+        else {
+            var category = new Category(
+                {
+                    name: req.body.name,
+                    description: req.body.description
+                });
+            category.save(function(err) {
+                if (err) {return next (err); }
+                res.redirect(category.url);
+            });
+        }
+    }
+];
+
 
 // Display category delete form on GET.
 exports.category_delete_get = function(req, res) {
