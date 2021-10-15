@@ -60,11 +60,12 @@ exports.category_detail = function(req, res) {
             Category.findById(req.params.id).exec(callback)
         },
         category_item_list: function(callback) {
-            Item.find({ 'category': req.params.id }, 'name description', callback)
+            Item.find({ 'category': req.params.id }, 'name description image', callback)
         
         },
     }, function(err, results) {
-    
+        
+        console.log(results)
         res.render('category_detail', { title: 'Category detail', error: err, data: results, pageId: req.params.id });
 
     });

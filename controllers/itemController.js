@@ -2,7 +2,22 @@ const { body, validationResult } = require('express-validator');
 var Item = require('../models/item');
 var Category = require('../models/category');
 var async = require('async');
-const { InsufficientStorage } = require('http-errors');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination(req, file, cb) {
+        cb(null, './public/images');
+    },
+    filename(req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.png')
+    }
+});
+
+const upload = multer({
+    storage: storage,
+})
+
 
 exports.index = function(req, res) {
     Item.countDocuments({})
@@ -53,6 +68,7 @@ exports.item_create_get = function(req, res) {
 
 // Handle item create on POST.
 exports.item_create_post = [
+    upload.single('image'),
     // Validate and sanitize
     body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
@@ -68,7 +84,8 @@ exports.item_create_post = [
             description: req.body.description,
             price: req.body.price,
             quantity: req.body.quantity,
-            category: req.body.category
+            category: req.body.category,
+            image: req.file?.filename
         });
 
         if (!errors.isEmpty()) {
