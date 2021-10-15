@@ -88,6 +88,7 @@ exports.category_create_post = [
     //Validation
     body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
+    body('password', 'Incorrect password').equals(process.env.PASSWORD),
 
     (req, res, next) => {
 
@@ -178,7 +179,8 @@ exports.category_update_post = [
     //Validate
     body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
-
+    body('password', 'Incorrect password').equals(process.env.PASSWORD),
+    
     (req, res, next) => {
 
         const errors = validationResult(req);

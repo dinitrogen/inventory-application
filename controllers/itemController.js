@@ -94,6 +94,7 @@ exports.item_create_post = [
           },
         },
       }),
+    body('password', 'Incorrect password').equals(process.env.PASSWORD),
 
     (req, res, next) => {
         const errors = validationResult(req);
@@ -197,6 +198,7 @@ exports.item_update_post = [
           },
         },
       }),
+    body('password', 'Incorrect password').equals(process.env.PASSWORD),
 
     (req, res, next) => {
         const errors = validationResult(req);
