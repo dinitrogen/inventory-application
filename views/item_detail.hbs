@@ -10,9 +10,13 @@
     </div>
 
 <p>
-    {{data.item.name}} - {{data.item.description}}
+    {{data.item.name}} - {{data.item.description}} 
 
 </p>
+<div>
+  
+  <img src="data:{{data.item.img.mimetype}};base64, {{toString data.item.img.file}}" class="img-fluid rounded-start" alt="test image" style="width:300px">
+</div>
 
 <button class="btn btn-primary">Add to cart</button>
 

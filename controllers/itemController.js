@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator');
+const { body, checkSchema, validationResult } = require('express-validator');
 var Item = require('../models/item');
 var Category = require('../models/category');
 var async = require('async');
@@ -14,9 +14,19 @@ const storage = multer.diskStorage({
     }
 });
 
+const memStorage = multer.memoryStorage();
+
 const upload = multer({
-    storage: storage,
-})
+    // storage: storage,
+    storage: memStorage,
+    limits: { fileSize: 1024 * 1024 },
+    fileFilter(req, file, cb) {
+        if (!file.mimetype.match(/^image/)) {
+            cb(new Error('Only images allowed'));
+        }
+        cb(null, true);
+    }
+});
 
 
 exports.index = function(req, res) {
@@ -47,7 +57,7 @@ exports.item_detail = function(req, res) {
             Category.find({}, 'name', callback);
         },
         item: function(callback) {
-            Item.findById(req.params.id, 'name description category', callback)
+            Item.findById(req.params.id, callback)
         
         },
     }, function(err, results) {
@@ -75,6 +85,15 @@ exports.item_create_post = [
     body('price', 'Price must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
     body('quantity', 'Quantity must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
     body('category', 'Category must not be empty').trim().isLength({min: 1}).escape(),
+    checkSchema({
+        image: {
+          custom: {
+            options: (value, { req }) => !!req.file,
+            errorMessage:
+              "An item image must be uploaded (jpg, png, gif, svg) < 1 MB",
+          },
+        },
+      }),
 
     (req, res, next) => {
         const errors = validationResult(req);
@@ -85,9 +104,14 @@ exports.item_create_post = [
             price: req.body.price,
             quantity: req.body.quantity,
             category: req.body.category,
-            image: req.file?.filename
+            img: {
+                file: req.file?.buffer,
+                filename: req.file?.originalname,
+                mimetype: req.file?.mimetype
+            },
         });
 
+        //console.log(item.img.file.toString('base64'));
         if (!errors.isEmpty()) {
             Category.find({}, 'name')
             .exec(function(err, categories) {
@@ -102,6 +126,7 @@ exports.item_create_post = [
             item.save(function(err) {
                 if (err) { return next(err); }
                 // successful - redirect to new item record
+             
                 res.redirect(item.url);
             });
         }
@@ -156,12 +181,22 @@ exports.item_update_get = function(req, res, next) {
 
 // Handle item update on POST.
 exports.item_update_post = [
+    upload.single('image'),
     // Validate and sanitize
     body('name', 'Name must not be empty.').trim().isLength({ min: 1}).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('price', 'Price must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
     body('quantity', 'Quantity must not be empty and a non-zero integer').trim().isInt({min: 0}).escape(),
     body('category', 'Category must not be empty').trim().isLength({min: 1}).escape(),
+    checkSchema({
+        image: {
+          custom: {
+            options: (value, { req }) => !!req.file,
+            errorMessage:
+              "An item image must be uploaded (jpg, png, gif, svg) < 1 MB",
+          },
+        },
+      }),
 
     (req, res, next) => {
         const errors = validationResult(req);
@@ -173,6 +208,11 @@ exports.item_update_post = [
                 price: req.body.price,
                 quantity: req.body.quantity,
                 category: req.body.category,
+                img: {
+                    file: req.file?.buffer,
+                    filename: req.file?.originalname,
+                    mimetype: req.file?.mimetype
+                },
                 _id:req.params.id // This is required or a new ID will be assigned
             });
         

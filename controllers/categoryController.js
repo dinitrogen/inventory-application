@@ -37,6 +37,13 @@ Handlebars.registerHelper('hasMembers', function(array) {
     } else return false;
 });
 
+Handlebars.registerHelper('toString', function(buffer) {
+    if (buffer) {
+        
+        return buffer.toString('base64');
+    } else return;
+
+});
 
 // Display list of categories
 exports.category_list = function(req, res) {
@@ -60,12 +67,12 @@ exports.category_detail = function(req, res) {
             Category.findById(req.params.id).exec(callback)
         },
         category_item_list: function(callback) {
-            Item.find({ 'category': req.params.id }, 'name description image', callback)
+            Item.find({ 'category': req.params.id }, callback)
         
         },
     }, function(err, results) {
         
-        console.log(results)
+     
         res.render('category_detail', { title: 'Category detail', error: err, data: results, pageId: req.params.id });
 
     });
