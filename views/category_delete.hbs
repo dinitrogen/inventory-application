@@ -23,9 +23,21 @@
     <div class="form-group">
         <input id={{categoryid}} class="form-control" type="hidden" name="categoryid" require="true" value={{category._id}}>
     </div>
-
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input id="password" class="form-control" type="password" placeholder="Enter password" name="password">
+    </div>
     <button class="btn btn-primary" type="submit">Delete</button> 
 
 </form>
 
+    {{#if errors}}
+    <ul>
+        {{#each errors}}
+        <li>{{this.msg}}</li>
+        {{/each}}
+    </ul>
+    {{/if}}
+
 {{/if}}
+

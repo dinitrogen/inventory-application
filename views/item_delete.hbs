@@ -6,9 +6,18 @@
     <div class="form-group">
         <input id={{itemid}} class="form-control" type="hidden" name="itemid" require="true" value={{item._id}}>
     </div>
-
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input id="password" class="form-control" type="password" placeholder="Enter password" name="password">
+    </div>
     <button class="btn btn-primary" type="submit">Delete</button> 
 
 </form>
 
-
+{{#if errors}}
+<ul>
+    {{#each errors}}
+    <li>{{this.msg}}</li>
+    {{/each}}
+</ul>
+{{/if}}

@@ -148,16 +148,34 @@ exports.item_delete_get = function(req, res) {
 };
 
 // Handle item delete on POST.
-exports.item_delete_post = function(req, res) {
-    Item.findById(req.body.itemid)
-        .exec(function(err, item) {
-            if (err) { return next(err); }
-            Item.findByIdAndRemove(req.body.itemid, function deleteItem(err) {
+exports.item_delete_post = [
+    body('password', 'Incorrect password').equals(process.env.PASSWORD),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            Item.findById(req.params.id)
+            .exec(function(err, item) {
                 if (err) { return next(err); }
-                res.redirect('/inventory/items')
-            })
-        })
-};
+
+                res.render('item_delete', {title: 'Delete item', item: item, errors: errors.array() });
+            });
+            return;
+        }
+        else {
+
+            Item.findById(req.body.itemid)
+                .exec(function(err, item) {
+                    if (err) { return next(err); }
+                    Item.findByIdAndRemove(req.body.itemid, function deleteItem(err) {
+                        if (err) { return next(err); }
+                        res.redirect('/inventory/items')
+                    })
+                })
+        }
+    }
+]
 
 // Display item update form on GET.
 exports.item_update_get = function(req, res, next) {
